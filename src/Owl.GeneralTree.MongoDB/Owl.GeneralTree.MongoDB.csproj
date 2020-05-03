@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\package.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Owl.GeneralTree</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.MongoDB" Version="2.6.2" />
+    <ProjectReference Include="..\Owl.GeneralTree.Domain\Owl.GeneralTree.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

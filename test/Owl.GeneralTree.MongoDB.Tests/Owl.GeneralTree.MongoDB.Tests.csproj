@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>Owl.GeneralTree</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
+    <PackageReference Include="Mongo2Go" Version="2.2.12" />
+    <ProjectReference Include="..\..\src\Owl.GeneralTree.MongoDB\Owl.GeneralTree.MongoDB.csproj" />
+    <ProjectReference Include="..\Owl.GeneralTree.TestBase\Owl.GeneralTree.TestBase.csproj" />
+  </ItemGroup>
+
+</Project>
