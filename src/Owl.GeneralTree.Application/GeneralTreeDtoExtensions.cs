@@ -4,11 +4,11 @@ using System.Linq;
 
 namespace Owl.GeneralTree
 {
-    public static class GeneralTreeExtensions
+    public static class GeneralTreeDtoExtensions
     {
         public static IEnumerable<TTree> ToTree<TTree, TPrimaryKey>(this IEnumerable<TTree> tree)
             where TPrimaryKey : struct
-            where TTree : class, IGeneralTree<TTree, TPrimaryKey>
+            where TTree : class, IGeneralTreeDto<TTree, TPrimaryKey>
         {
             var treeDic = tree.ToDictionary(x => x.Id);
 
@@ -37,7 +37,7 @@ namespace Owl.GeneralTree
         public static IEnumerable<TTree> ToTreeOrderBy<TTree, TPrimaryKey, TTreeProperty>(this IEnumerable<TTree> tree,
             Func<TTree, TTreeProperty> propertySelector)
             where TPrimaryKey : struct
-            where TTree : class, IGeneralTree<TTree, TPrimaryKey>
+            where TTree : class, IGeneralTreeDto<TTree, TPrimaryKey>
         {
             var treeDic = tree.ToDictionary(x => x.Id);
 
@@ -71,7 +71,7 @@ namespace Owl.GeneralTree
         public static IEnumerable<TTree> ToTreeOrderByDescending<TTree, TPrimaryKey, TTreeProperty>(
             this IEnumerable<TTree> tree, Func<TTree, TTreeProperty> propertySelector)
             where TPrimaryKey : struct
-            where TTree : class, IGeneralTree<TTree, TPrimaryKey>
+            where TTree : class, IGeneralTreeDto<TTree, TPrimaryKey>
         {
             var treeDic = tree.ToDictionary(x => x.Id);
 
