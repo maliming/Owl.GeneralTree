@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Owl.GeneralTree.MongoDB.Tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Owl.GeneralTree.EntityFrameworkCore.Tests", "test\Owl.GeneralTree.EntityFrameworkCore.Tests\Owl.GeneralTree.EntityFrameworkCore.Tests.csproj", "{4D0BDE2C-E65F-47AF-8482-246A98C166AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owl.GeneralTree.Domain.Tests", "test\Owl.GeneralTree.Domain.Tests\Owl.GeneralTree.Domain.Tests.csproj", "{214D0054-D6B6-42B7-BA38-C5ACC9FC5AA2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{4D0BDE2C-E65F-47AF-8482-246A98C166AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D0BDE2C-E65F-47AF-8482-246A98C166AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D0BDE2C-E65F-47AF-8482-246A98C166AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{214D0054-D6B6-42B7-BA38-C5ACC9FC5AA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{214D0054-D6B6-42B7-BA38-C5ACC9FC5AA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{214D0054-D6B6-42B7-BA38-C5ACC9FC5AA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{214D0054-D6B6-42B7-BA38-C5ACC9FC5AA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +73,7 @@ Global
 		{EC764CC7-08DA-4180-9E85-9BA478FC2145} = {649A3FFA-182F-4E56-9717-E6A9A2BEC545}
 		{B3ADF31A-E54A-4E76-BAFD-91C5E084A840} = {CCD2960C-23CC-4AB4-B84D-60C7AAA52F4D}
 		{4D0BDE2C-E65F-47AF-8482-246A98C166AB} = {CCD2960C-23CC-4AB4-B84D-60C7AAA52F4D}
+		{214D0054-D6B6-42B7-BA38-C5ACC9FC5AA2} = {CCD2960C-23CC-4AB4-B84D-60C7AAA52F4D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4324B3B4-B60B-4E3C-91D8-59576B4E26DD}
