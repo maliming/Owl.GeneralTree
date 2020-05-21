@@ -47,9 +47,10 @@ namespace Owl.GeneralTree.EntityFrameworkCore
             }
 
             var tree = await GetAsync(parentId.Value, cancellationToken: cancellationToken);
-            return this.Where(x => x.Code.StartsWith(tree.Code))
+            
+            return await this.Where(x => x.Code.StartsWith(tree.Code))
                 .Where(NotEqualId(parentId.Value))
-                .ToList();
+                .ToListAsync(cancellationToken: cancellationToken);
         }
 
         public async Task<bool> CheckSameNameAsync(TPrimaryKey? parentId, string name, TPrimaryKey excludeId, CancellationToken cancellationToken = default)
