@@ -31,7 +31,6 @@ namespace Owl.GeneralTree.MongoDB
         {
             return await GetMongoQueryable()
                 .Where(x => x.ParentId.Equals(parentId))
-                //.Where(EqualParentId(parentId))
                 .OrderByDescending(x => x.Code)
                 .FirstOrDefaultAsync(cancellationToken);
         }
@@ -40,32 +39,70 @@ namespace Owl.GeneralTree.MongoDB
         {
             return await GetMongoQueryable()
                 .Where(x => x.ParentId.Equals(parentId))
-                //.Where(EqualParentId(parentId))
+                .OrderBy(x => x.Code)
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<TTree>> GetAllChildrenAsync(TPrimaryKey? parentId, CancellationToken cancellationToken = default)
+        public async Task<List<TTree>> GetAllChildrenAsync(TPrimaryKey? parentId, TPrimaryKey? excludeId = null, CancellationToken cancellationToken = default)
         {
-            if (parentId.HasValue)
+            if (parentId == null)
             {
-                var tree = await FindAsync(parentId.Value, cancellationToken: cancellationToken);
-                return GetMongoQueryable()
-                    .Where(x => x.Code.StartsWith(tree.Code))
-                    .Where(x => !x.Id.Equals(parentId.Value))
-                    //.Where(NotEqualId(parentId.Value))
-                    .ToList();
+                return await GetListAsync(cancellationToken: cancellationToken);
             }
 
-            return await GetListAsync(cancellationToken: cancellationToken);
+            var tree = await GetAsync(parentId.Value, cancellationToken: cancellationToken);
+            if (excludeId == null)
+            {
+                return await GetMongoQueryable().Where(x => x.Code.StartsWith(tree.Code))
+                    .Where(x => !x.Id.Equals(parentId.Value))
+                    .OrderBy(x => x.Code)
+                    .ToListAsync(cancellationToken: cancellationToken);
+            }
+
+            var excludeTree = await GetAsync(parentId.Value, cancellationToken: cancellationToken);
+
+            return await GetMongoQueryable().Where(x => x.Code.StartsWith(tree.Code))
+                .Where(x => !x.Code.StartsWith(excludeTree.Code))
+                .Where(x => !x.Id.Equals(parentId.Value))
+                .OrderBy(x => x.Code)
+                .ToListAsync(cancellationToken: cancellationToken);
+        }
+
+        public async Task<List<TTree>> GetNextAllAsync(TPrimaryKey id, TPrimaryKey? excludeId = null, CancellationToken cancellationToken = default)
+        {
+            var tree = await GetAsync(id, cancellationToken: cancellationToken);
+
+            List<TTree> allChildren;
+            if (tree.ParentId != null)
+            {
+                var parent =  await GetAsync(tree.ParentId.Value, cancellationToken: cancellationToken);
+                allChildren =  await GetMongoQueryable().Where(x => x.Code.StartsWith(parent.Code))
+                    .OrderBy(x => x.Code)
+                    .ToListAsync(cancellationToken: cancellationToken);
+            }
+            else
+            {
+                allChildren =  await GetMongoQueryable()
+                    .OrderBy(x => x.Code)
+                    .ToListAsync(cancellationToken: cancellationToken);
+            }
+
+            var nextAll = allChildren.SkipWhile(x => x.Code != tree.Code);
+
+            if (excludeId != null)
+            {
+                var excludeTree = await GetAsync(excludeId.Value, cancellationToken: cancellationToken);
+                return nextAll.Where(x =>! x.Code.StartsWith(excludeTree.Code)).OrderBy(x => x.Code).ToList();
+            }
+
+            return nextAll.ToList();
         }
 
         public async Task<bool> CheckSameNameAsync(TPrimaryKey? parentId, string name, TPrimaryKey excludeId, CancellationToken cancellationToken = default)
         {
             return await GetMongoQueryable()
                 .Where(x => x.ParentId.Equals(parentId))
-                //.Where(EqualParentId(parentId))
                 .Where(x => !x.Id.Equals(excludeId))
-                //.Where(NotEqualId(excludeId))
                 .AnyAsync(x => x.Name == name, cancellationToken);
         }
 

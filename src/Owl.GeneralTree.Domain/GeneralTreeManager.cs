@@ -99,9 +99,9 @@ namespace Owl.GeneralTree
 
             await _generalTreeRepository.UpdateAsync(tree, cancellationToken: cancellationToken);
 
-            foreach (var child in await _generalTreeRepository.GetAllChildrenAsync(tree.Id, cancellationToken))
+            foreach (var child in await _generalTreeRepository.GetAllChildrenAsync(tree.Id, cancellationToken: cancellationToken))
             {
-                child.FullName = tree.FullName + _generalTreeOptions.Hyphen + _generalTreeCodeGenerator.RemoveParentCode(child.FullName, oldFullName);
+                child.FullName = tree.FullName + _generalTreeOptions.Hyphen + _generalTreeCodeGenerator.RemoveParentFullName(child.FullName, oldFullName, _generalTreeOptions.Hyphen);
 
                 childrenAction?.Invoke(child);
 
@@ -109,7 +109,7 @@ namespace Owl.GeneralTree
             }
         }
 
-        public virtual async Task MoveAfterAsync(TPrimaryKey id, TPrimaryKey afterId, Action<TTree> childrenAction = null, CancellationToken cancellationToken = default)
+        public virtual async Task MoveToBeforeAsync(TPrimaryKey id, TPrimaryKey afterId, Action<TTree> childrenAction = null, CancellationToken cancellationToken = default)
         {
             var sourceTree = await _generalTreeRepository.GetAsync(id, cancellationToken: cancellationToken);
             var destTree = await _generalTreeRepository.GetAsync(afterId, cancellationToken: cancellationToken);
@@ -118,22 +118,20 @@ namespace Owl.GeneralTree
                 ? await _generalTreeRepository.GetAsync(destTree.ParentId.Value, cancellationToken: cancellationToken)
                 : null;
 
-            var oldChildren = await _generalTreeRepository.GetAllChildrenAsync(id, cancellationToken);
+            var oldChildren = await _generalTreeRepository.GetAllChildrenAsync(id, cancellationToken: cancellationToken);
             var oldCode = sourceTree.Code;
             var oldFullName = sourceTree.FullName;
+
+            var nextAll = await _generalTreeRepository.GetNextAllAsync(destTree.Id, sourceTree.Id, cancellationToken);
 
             sourceTree.Code = destTree.Code;
             sourceTree.Level = sourceTree.Code.Split('.').Length;
             sourceTree.ParentId = destTree.ParentId;
             sourceTree.FullName = parent != null
-                ? parent.Name + _generalTreeOptions.Hyphen + sourceTree.Name
+                ? parent.FullName + _generalTreeOptions.Hyphen + sourceTree.Name
                 : sourceTree.Name;
 
             await CheckSameName(sourceTree);
-
-            var children = await _generalTreeRepository.GetChildrenAsync(parent?.Id, cancellationToken);
-
-            var allNext = children.SkipWhile(x => x.Code != destTree.Code);
 
             await _generalTreeRepository.UpdateAsync(sourceTree, cancellationToken: cancellationToken);
 
@@ -142,7 +140,7 @@ namespace Owl.GeneralTree
                 child.Code = _generalTreeCodeGenerator.MergeCode(sourceTree.Code, _generalTreeCodeGenerator.RemoveParentCode(child.Code, oldCode));
                 child.FullName = _generalTreeCodeGenerator.MergeFullName(
                     sourceTree.FullName,
-                    _generalTreeCodeGenerator.RemoveParentCode(child.FullName, oldFullName),
+                    _generalTreeCodeGenerator.RemoveParentFullName(child.FullName, oldFullName, _generalTreeOptions.Hyphen),
                     _generalTreeOptions.Hyphen);
                 child.Level = child.Code.Split('.').Length;
 
@@ -151,9 +149,25 @@ namespace Owl.GeneralTree
                 await _generalTreeRepository.UpdateAsync(child, cancellationToken: cancellationToken);
             }
 
-            foreach (var child in allNext)
+            foreach (var child in nextAll)
             {
-                child.Code = _generalTreeCodeGenerator.GetNextCode(child.Code);
+                if (child.Level == sourceTree.Level)
+                {
+                    child.Code = _generalTreeCodeGenerator.GetNextCode(child.Code);
+                }
+                else
+                {
+                    var childrenParent = nextAll.First(x => x.Id.Equals(child.ParentId));
+                    child.Code = _generalTreeCodeGenerator.MergeCode(childrenParent.Code,
+                        _generalTreeCodeGenerator.RemoveParentCode(child.Code, child.Level - 1));
+
+                    child.FullName = _generalTreeCodeGenerator.MergeFullName(
+                        childrenParent.FullName,
+                        _generalTreeCodeGenerator.RemoveParentFullName(child.FullName, child.Level - 1, _generalTreeOptions.Hyphen),
+                        _generalTreeOptions.Hyphen);
+                }
+
+                child.Level = child.Code.Split('.').Length;
 
                 childrenAction?.Invoke(child);
 
@@ -164,12 +178,8 @@ namespace Owl.GeneralTree
         public async Task MoveToAsync(TPrimaryKey id, TPrimaryKey? parentId, Action<TTree> childrenAction = null, CancellationToken cancellationToken = default)
         {
             var tree = await _generalTreeRepository.GetAsync(id, cancellationToken: cancellationToken);
-            if (tree.ParentId.Equals(parentId))
-            {
-                return;
-            }
 
-            var oldChildren = await _generalTreeRepository.GetAllChildrenAsync(id, cancellationToken);
+            var oldChildren = await _generalTreeRepository.GetAllChildrenAsync(id, cancellationToken: cancellationToken);
 
             var oldCode = tree.Code;
             var oldFullName = tree.FullName;
@@ -188,7 +198,7 @@ namespace Owl.GeneralTree
                 child.Code = _generalTreeCodeGenerator.MergeCode(tree.Code, _generalTreeCodeGenerator.RemoveParentCode(child.Code, oldCode));
                 child.FullName = _generalTreeCodeGenerator.MergeFullName(
                     tree.FullName,
-                    _generalTreeCodeGenerator.RemoveParentCode(child.FullName, oldFullName),
+                    _generalTreeCodeGenerator.RemoveParentFullName(child.FullName, oldFullName, _generalTreeOptions.Hyphen),
                     _generalTreeOptions.Hyphen);
                 child.Level = child.Code.Split('.').Length;
 
@@ -205,6 +215,37 @@ namespace Owl.GeneralTree
             {
                 await _generalTreeRepository.DeleteAsync(x => x.Code.StartsWith(tree.Code),
                     cancellationToken: cancellationToken);
+            }
+        }
+
+        public async Task RegenerateAsync(TPrimaryKey? parentId, CancellationToken cancellationToken = default)
+        {
+            var all = await _generalTreeRepository.GetAllChildrenAsync(parentId, null, cancellationToken);
+
+            foreach (var levelGroup in all.GroupBy(x => x.Level).OrderBy(x => x.Key))
+            {
+                foreach (var trees in levelGroup.GroupBy(x => x.ParentId))
+                {
+                    var index = 1;
+                    foreach (var tree in trees.OrderBy(x => x.Code))
+                    {
+                        if (tree.ParentId == null)
+                        {
+                            tree.Code = _generalTreeCodeGenerator.CreateCode(index);
+                        }
+                        else
+                        {
+                            var parent = all.FirstOrDefault(x => x.Id.Equals(tree.ParentId)) ??
+                                         await _generalTreeRepository.GetAsync(tree.ParentId.Value, cancellationToken: cancellationToken);
+
+                            tree.Code = _generalTreeCodeGenerator.MergeCode(parent.Code, _generalTreeCodeGenerator.CreateCode(index));
+                        }
+
+                        await _generalTreeRepository.UpdateAsync(tree, cancellationToken: cancellationToken);
+
+                        index++;
+                    }
+                }
             }
         }
 
@@ -343,16 +384,16 @@ namespace Owl.GeneralTree
             throw new UserFriendlyException(_generalTreeStringLocalizer["GeneralTreeNameIsDuplicate", tree.Name]);
         }
 
-        private async Task<string> GetChildFullNameAsync(TPrimaryKey? parentId, string childFullName,
+        private async Task<string> GetChildFullNameAsync(TPrimaryKey? parentId, string childName,
             CancellationToken cancellationToken = default)
         {
             if (!parentId.HasValue)
             {
-                return childFullName;
+                return childName;
             }
 
             var parent = await _generalTreeRepository.FindAsync(parentId.Value, cancellationToken: cancellationToken);
-            return parent != null ? parent.FullName + _generalTreeOptions.Hyphen + childFullName : childFullName;
+            return parent != null ? parent.FullName + _generalTreeOptions.Hyphen + childName : childName;
         }
     }
 }

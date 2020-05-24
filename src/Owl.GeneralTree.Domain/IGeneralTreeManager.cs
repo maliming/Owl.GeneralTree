@@ -20,12 +20,12 @@ namespace Owl.GeneralTree
 
         Task UpdateNameAsync(TTree tree, Action<TTree> childrenAction = null, CancellationToken cancellationToken = default);
 
-        Task MoveAfterAsync(TPrimaryKey id, TPrimaryKey afterId, Action<TTree> childrenAction = null, CancellationToken cancellationToken = default);
+        Task MoveToBeforeAsync(TPrimaryKey id, TPrimaryKey afterId, Action<TTree> childrenAction = null, CancellationToken cancellationToken = default);
 
         Task MoveToAsync(TPrimaryKey id, TPrimaryKey? parentId, Action<TTree> childrenAction = null, CancellationToken cancellationToken = default);
 
         Task DeleteAsync(TPrimaryKey id, CancellationToken cancellationToken = default);
 
-        //Task Regenerate(CancellationToken cancellationToken = default);
+        Task RegenerateAsync(TPrimaryKey? parentId = null, CancellationToken cancellationToken = default);
     }
 }

@@ -1,51 +1,35 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Volo.Abp.AuditLogging.EntityFrameworkCore;
-using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using Owl.GeneralTree.EntityFrameworkCore;
+using Volo.Abp;
 using Volo.Abp.EntityFrameworkCore;
-using Volo.Abp.EntityFrameworkCore.SqlServer;
-using Volo.Abp.FeatureManagement.EntityFrameworkCore;
-using Volo.Abp.Identity.EntityFrameworkCore;
-using Volo.Abp.IdentityServer.EntityFrameworkCore;
 using Volo.Abp.Modularity;
-using Volo.Abp.PermissionManagement.EntityFrameworkCore;
-using Volo.Abp.SettingManagement.EntityFrameworkCore;
-using Volo.Abp.TenantManagement.EntityFrameworkCore;
+
 
 namespace MyTree.EntityFrameworkCore
 {
     [DependsOn(
         typeof(MyTreeDomainModule),
-        typeof(AbpIdentityEntityFrameworkCoreModule),
-        typeof(AbpIdentityServerEntityFrameworkCoreModule),
-        typeof(AbpPermissionManagementEntityFrameworkCoreModule),
-        typeof(AbpSettingManagementEntityFrameworkCoreModule),
-        typeof(AbpEntityFrameworkCoreSqlServerModule),
-        typeof(AbpBackgroundJobsEntityFrameworkCoreModule),
-        typeof(AbpAuditLoggingEntityFrameworkCoreModule),
-        typeof(AbpTenantManagementEntityFrameworkCoreModule),
-        typeof(AbpFeatureManagementEntityFrameworkCoreModule)
-        )]
+        typeof(GeneralTreeEntityFrameworkCoreModule)
+    )]
     public class MyTreeEntityFrameworkCoreModule : AbpModule
     {
-        public override void PreConfigureServices(ServiceConfigurationContext context)
-        {
-            MyTreeEfCoreEntityExtensionMappings.Configure();
-        }
+        private readonly SqliteConnection _sqliteConnection = new SqliteConnection("Data Source=:memory:");
 
         public override void ConfigureServices(ServiceConfigurationContext context)
         {
             context.Services.AddAbpDbContext<MyTreeDbContext>(options =>
             {
-                /* Remove "includeAllEntities: true" to create
-                 * default repositories only for aggregate roots */
                 options.AddDefaultRepositories(includeAllEntities: true);
             });
 
-            Configure<AbpDbContextOptions>(options =>
+            _sqliteConnection.Open();
+            context.Services.Configure<AbpDbContextOptions>(options =>
             {
-                /* The main point to change your DBMS.
-                 * See also MyTreeMigrationsDbContextFactory for EF Core tooling. */
-                options.UseSqlServer();
+                options.Configure(x => x.DbContextOptions.UseSqlite(_sqliteConnection));
             });
         }
     }

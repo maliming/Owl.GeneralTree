@@ -10,7 +10,11 @@ namespace Owl.GeneralTree
             where TPrimaryKey : struct
             where TTree : class, IGeneralTree<TTree, TPrimaryKey>
         {
-            var treeDic = tree.ToDictionary(x => x.Id);
+            var treeDic = tree.Select(x =>
+            {
+                x.Children = null;
+                return x;
+            }).ToDictionary(x => x.Id);
 
             foreach (var t in treeDic.Where(x => x.Value.ParentId.HasValue).Select(x => x.Value))
             {
@@ -39,7 +43,11 @@ namespace Owl.GeneralTree
             where TPrimaryKey : struct
             where TTree : class, IGeneralTree<TTree, TPrimaryKey>
         {
-            var treeDic = tree.ToDictionary(x => x.Id);
+            var treeDic = tree.Select(x =>
+            {
+                x.Children = null;
+                return x;
+            }).ToDictionary(x => x.Id);
 
             foreach (var t in treeDic.Where(x => x.Value.ParentId.HasValue).Select(x => x.Value))
             {
@@ -73,7 +81,11 @@ namespace Owl.GeneralTree
             where TPrimaryKey : struct
             where TTree : class, IGeneralTree<TTree, TPrimaryKey>
         {
-            var treeDic = tree.ToDictionary(x => x.Id);
+            var treeDic = tree.Select(x =>
+            {
+                x.Children = null;
+                return x;
+            }).ToDictionary(x => x.Id);
 
             foreach (var t in treeDic.Where(x => x.Value.ParentId.HasValue).Select(x => x.Value))
             {

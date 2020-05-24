@@ -90,6 +90,53 @@ namespace Owl.GeneralTree
             return code.Length == parentCode.Length ? null : code.Substring(parentCode.Length + 1);
         }
 
+        public string RemoveParentCode(string code, int parentLevel)
+        {
+            if (code.IsNullOrEmpty())
+            {
+                throw new ArgumentNullException(nameof(code), "code can not be null or empty.");
+            }
+
+            var codeArray = code.Split(".");
+            if (parentLevel > codeArray.Length)
+            {
+                throw new ArgumentNullException(nameof(parentLevel), "parentLevel exceeds the level of code.");
+            }
+
+            return string.Join(".", codeArray.Skip(parentLevel));
+        }
+
+        public string RemoveParentFullName(string fullName, string parentFullName, string hyphen)
+        {
+            if (fullName.IsNullOrEmpty())
+            {
+                throw new ArgumentNullException(nameof(fullName), "fullName can not be null or empty.");
+            }
+
+            if (parentFullName.IsNullOrEmpty())
+            {
+                return fullName;
+            }
+
+            return fullName.Length == parentFullName.Length ? null : fullName.Substring(parentFullName.Length + hyphen.Length);
+        }
+
+        public string RemoveParentFullName(string fullName, int parentLevel, string hyphen)
+        {
+            if (fullName.IsNullOrEmpty())
+            {
+                throw new ArgumentNullException(nameof(fullName), "fullName can not be null or empty.");
+            }
+
+            var codeArray = fullName.Split(hyphen);
+            if (parentLevel > codeArray.Length)
+            {
+                throw new ArgumentNullException(nameof(parentLevel), "parentLevel exceeds the level of code.");
+            }
+
+            return string.Join(hyphen, codeArray.Skip(parentLevel));
+        }
+
         /// <summary>
         /// Get next code for given code.
         /// Example: if code = "00001.00001" returns "00001.00002".

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -537,12 +537,13 @@ namespace Owl.GeneralTree
         }
 
         [Fact]
-        public async Task MoveAfterAsync()
+        public async Task MoveToBeforeAsync()
         {
             //Act
             var beijing = await CreateRegion("beijing");
             await CreateRegion("dongcheng", beijing.Id);
             var xicheng = await CreateRegion("xicheng", beijing.Id);
+            var changanjie = await CreateRegion("changanjie", xicheng.Id);
 
             var hebei = await CreateRegion("hebei");
             await CreateRegion("shijiazhuang", hebei.Id);
@@ -550,7 +551,7 @@ namespace Owl.GeneralTree
             await CreateRegion("shaungqiao", chengde.Id);
             await CreateRegion("shaungluan", chengde.Id);
 
-            await _generalTreeManager.MoveAfterAsync(chengde.Id, xicheng.Id);
+            await _generalTreeManager.MoveToBeforeAsync(chengde.Id, xicheng.Id);
 
             //Assert
             var cd = await GetRegion(chengde.Name);
@@ -567,6 +568,14 @@ namespace Owl.GeneralTree
             xicheng.Level.ShouldBe(beijing.Level + 1);
             xicheng.Code.ShouldBe(_generalTreeCodeGenerator.GetNextCode(cd.Code));
 
+            changanjie = await GetRegion("changanjie");
+            changanjie.ShouldNotBeNull();
+            changanjie.FullName.ShouldBe(beijing.FullName + "-" + xicheng.Name+ "-" + changanjie.Name);
+            changanjie.ParentId.ShouldBe(xicheng.Id);
+            changanjie.Level.ShouldBe(xicheng.Level + 1);
+            changanjie.Code.ShouldBe(_generalTreeCodeGenerator.MergeCode(xicheng.Code,
+                _generalTreeCodeGenerator.RemoveParentCode(changanjie.Code, changanjie.Level - 1)));
+
             var shaungqiao = await GetRegion("shaungqiao");
             shaungqiao.ShouldNotBeNull();
             shaungqiao.FullName.ShouldBe(cd.FullName + "-" + shaungqiao.Name);
@@ -576,7 +585,7 @@ namespace Owl.GeneralTree
         }
 
         [Fact]
-        public async Task MoveAfter_Root_Test()
+        public async Task MoveToBefore_Children_Test()
         {
             //Act
             var beijing = await CreateRegion("beijing");
@@ -589,7 +598,7 @@ namespace Owl.GeneralTree
             await CreateRegion("shaungqiao", chengde.Id);
             await CreateRegion("shaungluan", chengde.Id);
 
-            await _generalTreeManager.MoveAfterAsync(chengde.Id, hebei.Id);
+            await _generalTreeManager.MoveToBeforeAsync(chengde.Id, hebei.Id);
 
             //Assert
             var cd = await GetRegion(chengde.Name);
@@ -633,6 +642,95 @@ namespace Owl.GeneralTree
 
             var cdsq = await GetRegion("shaungqiao");
             cdsq.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task RegenerateAsync()
+        {
+            var hebei = await CreateRegion("hebei");
+            var shijiazhuang = await CreateRegion("shijiazhuang", hebei.Id);
+            var chengde = await CreateRegion("chengde", hebei.Id);
+            var shaungqiao = await CreateRegion("shaungqiao", chengde.Id);
+            var shaungluan = await CreateRegion("shaungluan", chengde.Id);
+
+            var oldShijianzhuang = shijiazhuang.Code;
+            var oldChengdeCode = chengde.Code;
+            var oldShaungqiaoCode = shaungqiao.Code;
+            var oldShaungluanCode = shaungluan.Code;
+
+            chengde.Code = hebei.Code + "."  + _generalTreeCodeGenerator.CreateCode(5);
+            shaungqiao.Code = chengde.Code + "."  + _generalTreeCodeGenerator.CreateCode(10);
+            shaungluan.Code = chengde.Code + "."  + _generalTreeCodeGenerator.CreateCode(15);
+            await _generalTreeRepository.UpdateAsync(chengde);
+            await _generalTreeRepository.UpdateAsync(shaungqiao);
+            await _generalTreeRepository.UpdateAsync(shaungluan);
+
+            await _generalTreeManager.RegenerateAsync(hebei.Id);
+
+            chengde = await GetRegion(chengde.Name);
+            chengde.Code.ShouldBe(oldChengdeCode);
+            shijiazhuang = await GetRegion(shijiazhuang.Name);
+            shijiazhuang.Code.ShouldBe(oldShijianzhuang);
+            shaungqiao = await GetRegion(shaungqiao.Name);
+            shaungqiao.Code.ShouldBe(oldShaungqiaoCode);
+            shaungluan = await GetRegion(shaungluan.Name);
+            shaungluan.Code.ShouldBe(oldShaungluanCode);
+        }
+
+        [Fact]
+        public async Task Regenerate_Root_Test()
+        {
+            var hebei = await CreateRegion("hebei");
+            var shijiazhuang = await CreateRegion("shijiazhuang", hebei.Id);
+            var chengde = await CreateRegion("chengde", hebei.Id);
+            var shaungqiao = await CreateRegion("shaungqiao", chengde.Id);
+            var shaungluan = await CreateRegion("shaungluan", chengde.Id);
+
+            var beijing = await CreateRegion("beijing");
+            var dongcheng = await CreateRegion("dongcheng", beijing.Id);
+            var xicheng = await CreateRegion("xicheng", beijing.Id);
+            var changanjie = await CreateRegion("changanjie", xicheng.Id);
+
+            var oldChengdeCode = chengde.Code;
+            var oldShaungqiaoCode = shaungqiao.Code;
+            var oldShaungluanCode = shaungluan.Code;
+            chengde.Code = hebei.Code  + "." + _generalTreeCodeGenerator.CreateCode(5);
+            shaungqiao.Code = chengde.Code  + "." + _generalTreeCodeGenerator.CreateCode(10);
+            shaungluan.Code = chengde.Code  + "." + _generalTreeCodeGenerator.CreateCode(15);
+            await _generalTreeRepository.UpdateAsync(chengde);
+            await _generalTreeRepository.UpdateAsync(shaungqiao);
+            await _generalTreeRepository.UpdateAsync(shaungluan);
+
+            var oldbeijingCode = beijing.Code;
+            var oldXichengCode = xicheng.Code;
+            var oldchanganjieCode = changanjie.Code;
+            var oldDongcheng = dongcheng.Code;
+            beijing.Code = _generalTreeCodeGenerator.CreateCode(5);
+            dongcheng.Code = beijing.Code + "." + _generalTreeCodeGenerator.CreateCode(9);
+            xicheng.Code = beijing.Code + "."  + _generalTreeCodeGenerator.CreateCode(10);
+            changanjie.Code = xicheng.Code + "."  + _generalTreeCodeGenerator.CreateCode(15);
+            await _generalTreeRepository.UpdateAsync(beijing);
+            await _generalTreeRepository.UpdateAsync(xicheng);
+            await _generalTreeRepository.UpdateAsync(changanjie);
+            await _generalTreeRepository.UpdateAsync(dongcheng);
+
+            await _generalTreeManager.RegenerateAsync();
+
+            chengde = await GetRegion(chengde.Name);
+            chengde.Code.ShouldBe(oldChengdeCode);
+            shaungqiao = await GetRegion(shaungqiao.Name);
+            shaungqiao.Code.ShouldBe(oldShaungqiaoCode);
+            shaungluan = await GetRegion(shaungluan.Name);
+            shaungluan.Code.ShouldBe(oldShaungluanCode);
+
+            beijing = await GetRegion(beijing.Name);
+            beijing.Code.ShouldBe(oldbeijingCode);
+            xicheng = await GetRegion(xicheng.Name);
+            xicheng.Code.ShouldBe(oldXichengCode);
+            changanjie = await GetRegion(changanjie.Name);
+            changanjie.Code.ShouldBe(oldchanganjieCode);
+            dongcheng = await GetRegion(dongcheng.Name);
+            dongcheng.Code.ShouldBe(oldDongcheng);
         }
 
         [Fact]

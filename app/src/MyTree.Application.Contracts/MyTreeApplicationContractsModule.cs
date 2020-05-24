@@ -1,27 +1,14 @@
-﻿using Volo.Abp.Account;
-using Volo.Abp.FeatureManagement;
-using Volo.Abp.Identity;
+﻿using Owl.GeneralTree;
 using Volo.Abp.Modularity;
-using Volo.Abp.ObjectExtending;
-using Volo.Abp.PermissionManagement;
-using Volo.Abp.TenantManagement;
 
 namespace MyTree
 {
     [DependsOn(
         typeof(MyTreeDomainSharedModule),
-        typeof(AbpAccountApplicationContractsModule),
-        typeof(AbpFeatureManagementApplicationContractsModule),
-        typeof(AbpIdentityApplicationContractsModule),
-        typeof(AbpPermissionManagementApplicationContractsModule),
-        typeof(AbpTenantManagementApplicationContractsModule),
-        typeof(AbpObjectExtendingModule)
+        typeof(GeneralTreeApplicationContractsModule)
     )]
     public class MyTreeApplicationContractsModule : AbpModule
     {
-        public override void PreConfigureServices(ServiceConfigurationContext context)
-        {
-            MyTreeDtoExtensions.Configure();
-        }
+
     }
 }

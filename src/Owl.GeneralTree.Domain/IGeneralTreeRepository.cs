@@ -19,7 +19,9 @@ namespace Owl.GeneralTree
 
         Task<List<TTree>> GetChildrenAsync(TPrimaryKey? parentId, CancellationToken cancellationToken = default);
 
-        Task<List<TTree>> GetAllChildrenAsync(TPrimaryKey? parentId, CancellationToken cancellationToken = default);
+        Task<List<TTree>> GetAllChildrenAsync(TPrimaryKey? parentId, TPrimaryKey? excludeId = null, CancellationToken cancellationToken = default);
+
+        Task<List<TTree>> GetNextAllAsync(TPrimaryKey id, TPrimaryKey? excludeId = null, CancellationToken cancellationToken = default);
 
         Task<bool> CheckSameNameAsync(TPrimaryKey? parentId, string name, TPrimaryKey excludeId, CancellationToken cancellationToken = default);
     }
