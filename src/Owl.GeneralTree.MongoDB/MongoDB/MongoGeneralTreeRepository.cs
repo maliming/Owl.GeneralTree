@@ -75,14 +75,14 @@ namespace Owl.GeneralTree.MongoDB
             List<TTree> allChildren;
             if (tree.ParentId != null)
             {
-                var parent =  await GetAsync(tree.ParentId.Value, cancellationToken: cancellationToken);
-                allChildren =  await GetMongoQueryable().Where(x => x.Code.StartsWith(parent.Code))
+                var parent = await GetAsync(tree.ParentId.Value, cancellationToken: cancellationToken);
+                allChildren = await GetMongoQueryable().Where(x => x.Code.StartsWith(parent.Code))
                     .OrderBy(x => x.Code)
                     .ToListAsync(cancellationToken: cancellationToken);
             }
             else
             {
-                allChildren =  await GetMongoQueryable()
+                allChildren = await GetMongoQueryable()
                     .OrderBy(x => x.Code)
                     .ToListAsync(cancellationToken: cancellationToken);
             }
@@ -92,7 +92,7 @@ namespace Owl.GeneralTree.MongoDB
             if (excludeId != null)
             {
                 var excludeTree = await GetAsync(excludeId.Value, cancellationToken: cancellationToken);
-                return nextAll.Where(x =>! x.Code.StartsWith(excludeTree.Code)).OrderBy(x => x.Code).ToList();
+                return nextAll.Where(x => !x.Code.StartsWith(excludeTree.Code)).OrderBy(x => x.Code).ToList();
             }
 
             return nextAll.ToList();
@@ -117,7 +117,7 @@ namespace Owl.GeneralTree.MongoDB
 
             if (applyFilters)
             {
-                AddGlobalFilters(filters);
+                RepositoryFilterer.AddGlobalFilters(filters);
             }
 
             return Builders<TTree>.Filter.And(filters);
@@ -132,7 +132,7 @@ namespace Owl.GeneralTree.MongoDB
 
             if (applyFilters)
             {
-                AddGlobalFilters(filters);
+                RepositoryFilterer.AddGlobalFilters(filters);
             }
 
             return Builders<TTree>.Filter.And(filters);
@@ -147,7 +147,7 @@ namespace Owl.GeneralTree.MongoDB
 
             if (applyFilters)
             {
-                AddGlobalFilters(filters);
+                RepositoryFilterer.AddGlobalFilters(filters);
             }
 
             return Builders<TTree>.Filter.And(filters);
@@ -162,7 +162,7 @@ namespace Owl.GeneralTree.MongoDB
 
             if (applyFilters)
             {
-                AddGlobalFilters(filters);
+                RepositoryFilterer.AddGlobalFilters(filters);
             }
 
             return Builders<TTree>.Filter.And(filters);
