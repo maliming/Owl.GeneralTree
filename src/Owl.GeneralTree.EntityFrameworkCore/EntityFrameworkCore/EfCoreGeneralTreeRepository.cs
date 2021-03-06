@@ -24,19 +24,19 @@ namespace Owl.GeneralTree.EntityFrameworkCore
 
         public async Task<TTree> GetByNameAsync(string name, CancellationToken cancellationToken = default)
         {
-            return await this.FirstOrDefaultAsync(x => x.Name == name, cancellationToken);
+            return await (await GetQueryableAsync()).FirstOrDefaultAsync(x => x.Name == name, cancellationToken);
         }
 
         public async Task<TTree> GetLastChildrenAsync(TPrimaryKey? parentId, CancellationToken cancellationToken = default)
         {
-            return await this.Where(EqualParentId(parentId))
+            return await (await GetQueryableAsync()).Where(EqualParentId(parentId))
                 .OrderByDescending(x => x.Code)
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
         public async Task<List<TTree>> GetChildrenAsync(TPrimaryKey? parentId, CancellationToken cancellationToken = default)
         {
-            return await this.Where(EqualParentId(parentId))
+            return await (await GetQueryableAsync()).Where(EqualParentId(parentId))
                 .OrderBy(x => x.Code)
                 .ToListAsync(cancellationToken);
         }
@@ -51,7 +51,7 @@ namespace Owl.GeneralTree.EntityFrameworkCore
             var tree = await GetAsync(parentId.Value, cancellationToken: cancellationToken);
             if (excludeId == null)
             {
-                return await this.Where(x => x.Code.StartsWith(tree.Code))
+                return await (await GetQueryableAsync()).Where(x => x.Code.StartsWith(tree.Code))
                     .Where(NotEqualId(parentId.Value))
                     .OrderBy(x => x.Code)
                     .ToListAsync(cancellationToken: cancellationToken);
@@ -59,7 +59,7 @@ namespace Owl.GeneralTree.EntityFrameworkCore
 
             var excludeTree = await GetAsync(parentId.Value, cancellationToken: cancellationToken);
 
-            return await this.Where(x => x.Code.StartsWith(tree.Code))
+            return await (await GetQueryableAsync()).Where(x => x.Code.StartsWith(tree.Code))
                 .Where(x => !x.Code.StartsWith(excludeTree.Code))
                 .Where(NotEqualId(parentId.Value))
                 .OrderBy(x => x.Code)
@@ -74,13 +74,13 @@ namespace Owl.GeneralTree.EntityFrameworkCore
             if (tree.ParentId != null)
             {
                 var parent =  await GetAsync(tree.ParentId.Value, cancellationToken: cancellationToken);
-                allChildren =  await this.Where(x => x.Code.StartsWith(parent.Code))
+                allChildren =  await (await GetQueryableAsync()).Where(x => x.Code.StartsWith(parent.Code))
                     .OrderBy(x => x.Code)
                     .ToListAsync(cancellationToken: cancellationToken);
             }
             else
             {
-                allChildren =  await this
+                allChildren =  await (await GetQueryableAsync())
                     .OrderBy(x => x.Code)
                     .ToListAsync(cancellationToken: cancellationToken);
             }
@@ -98,7 +98,7 @@ namespace Owl.GeneralTree.EntityFrameworkCore
 
         public async Task<bool> CheckSameNameAsync(TPrimaryKey? parentId, string name, TPrimaryKey excludeId, CancellationToken cancellationToken = default)
         {
-            return await this.Where(EqualParentId(parentId))
+            return await (await GetQueryableAsync()).Where(EqualParentId(parentId))
                 .Where(NotEqualId(excludeId))
                 .AnyAsync(x => x.Name == name, cancellationToken);
         }

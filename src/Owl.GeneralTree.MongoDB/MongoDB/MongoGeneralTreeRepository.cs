@@ -22,14 +22,14 @@ namespace Owl.GeneralTree.MongoDB
 
         public async Task<TTree> GetByNameAsync(string name, CancellationToken cancellationToken = default)
         {
-            return await GetMongoQueryable()
+            return await (await GetMongoQueryableAsync(cancellationToken))
                 .Where(x => x.Name == name)
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
         public async Task<TTree> GetLastChildrenAsync(TPrimaryKey? parentId, CancellationToken cancellationToken = default)
         {
-            return await GetMongoQueryable()
+            return await (await GetMongoQueryableAsync(cancellationToken))
                 .Where(x => x.ParentId.Equals(parentId))
                 .OrderByDescending(x => x.Code)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -37,7 +37,7 @@ namespace Owl.GeneralTree.MongoDB
 
         public async Task<List<TTree>> GetChildrenAsync(TPrimaryKey? parentId, CancellationToken cancellationToken = default)
         {
-            return await GetMongoQueryable()
+            return await (await GetMongoQueryableAsync(cancellationToken))
                 .Where(x => x.ParentId.Equals(parentId))
                 .OrderBy(x => x.Code)
                 .ToListAsync(cancellationToken);
@@ -53,7 +53,7 @@ namespace Owl.GeneralTree.MongoDB
             var tree = await GetAsync(parentId.Value, cancellationToken: cancellationToken);
             if (excludeId == null)
             {
-                return await GetMongoQueryable().Where(x => x.Code.StartsWith(tree.Code))
+                return await (await GetMongoQueryableAsync(cancellationToken)).Where(x => x.Code.StartsWith(tree.Code))
                     .Where(x => !x.Id.Equals(parentId.Value))
                     .OrderBy(x => x.Code)
                     .ToListAsync(cancellationToken: cancellationToken);
@@ -61,7 +61,7 @@ namespace Owl.GeneralTree.MongoDB
 
             var excludeTree = await GetAsync(parentId.Value, cancellationToken: cancellationToken);
 
-            return await GetMongoQueryable().Where(x => x.Code.StartsWith(tree.Code))
+            return await (await GetMongoQueryableAsync(cancellationToken)).Where(x => x.Code.StartsWith(tree.Code))
                 .Where(x => !x.Code.StartsWith(excludeTree.Code))
                 .Where(x => !x.Id.Equals(parentId.Value))
                 .OrderBy(x => x.Code)
@@ -76,13 +76,13 @@ namespace Owl.GeneralTree.MongoDB
             if (tree.ParentId != null)
             {
                 var parent =  await GetAsync(tree.ParentId.Value, cancellationToken: cancellationToken);
-                allChildren =  await GetMongoQueryable().Where(x => x.Code.StartsWith(parent.Code))
+                allChildren =  await (await GetMongoQueryableAsync(cancellationToken)).Where(x => x.Code.StartsWith(parent.Code))
                     .OrderBy(x => x.Code)
                     .ToListAsync(cancellationToken: cancellationToken);
             }
             else
             {
-                allChildren =  await GetMongoQueryable()
+                allChildren =  await (await GetMongoQueryableAsync(cancellationToken))
                     .OrderBy(x => x.Code)
                     .ToListAsync(cancellationToken: cancellationToken);
             }
@@ -100,7 +100,7 @@ namespace Owl.GeneralTree.MongoDB
 
         public async Task<bool> CheckSameNameAsync(TPrimaryKey? parentId, string name, TPrimaryKey excludeId, CancellationToken cancellationToken = default)
         {
-            return await GetMongoQueryable()
+            return await (await GetMongoQueryableAsync(cancellationToken))
                 .Where(x => x.ParentId.Equals(parentId))
                 .Where(x => !x.Id.Equals(excludeId))
                 .AnyAsync(x => x.Name == name, cancellationToken);
@@ -117,7 +117,7 @@ namespace Owl.GeneralTree.MongoDB
 
             if (applyFilters)
             {
-                AddGlobalFilters(filters);
+                RepositoryFilterer.AddGlobalFilters(filters);
             }
 
             return Builders<TTree>.Filter.And(filters);
@@ -132,7 +132,7 @@ namespace Owl.GeneralTree.MongoDB
 
             if (applyFilters)
             {
-                AddGlobalFilters(filters);
+                RepositoryFilterer.AddGlobalFilters(filters);
             }
 
             return Builders<TTree>.Filter.And(filters);
@@ -147,7 +147,7 @@ namespace Owl.GeneralTree.MongoDB
 
             if (applyFilters)
             {
-                AddGlobalFilters(filters);
+                RepositoryFilterer.AddGlobalFilters(filters);
             }
 
             return Builders<TTree>.Filter.And(filters);
@@ -162,7 +162,7 @@ namespace Owl.GeneralTree.MongoDB
 
             if (applyFilters)
             {
-                AddGlobalFilters(filters);
+                RepositoryFilterer.AddGlobalFilters(filters);
             }
 
             return Builders<TTree>.Filter.And(filters);
