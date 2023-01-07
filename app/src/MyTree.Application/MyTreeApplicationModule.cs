@@ -2,22 +2,21 @@
 using Volo.Abp.AutoMapper;
 using Volo.Abp.Modularity;
 
-namespace MyTree
+namespace MyTree;
+
+[DependsOn(
+    typeof(AbpAutoMapperModule),
+    typeof(MyTreeDomainModule),
+    typeof(MyTreeApplicationContractsModule),
+    typeof(GeneralTreeApplicationModule)
+)]
+public class MyTreeApplicationModule : AbpModule
 {
-    [DependsOn(
-        typeof(AbpAutoMapperModule),
-        typeof(MyTreeDomainModule),
-        typeof(MyTreeApplicationContractsModule),
-        typeof(GeneralTreeApplicationModule)
-    )]
-    public class MyTreeApplicationModule : AbpModule
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        public override void ConfigureServices(ServiceConfigurationContext context)
+        Configure<AbpAutoMapperOptions>(options =>
         {
-            Configure<AbpAutoMapperOptions>(options =>
-            {
-                options.AddMaps<MyTreeApplicationModule>();
-            });
-        }
+            options.AddMaps<MyTreeApplicationModule>();
+        });
     }
 }

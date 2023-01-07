@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
 
-namespace MyTree.Web
+namespace MyTree.Web;
+
+public class MyTreeWebAutoMapperProfile : Profile
 {
-    public class MyTreeWebAutoMapperProfile : Profile
+    public MyTreeWebAutoMapperProfile()
     {
-        public MyTreeWebAutoMapperProfile()
-        {
-            //Define your AutoMapper configuration here for the Web project.
-        }
+        //Define your AutoMapper configuration here for the Web project.
     }
 }

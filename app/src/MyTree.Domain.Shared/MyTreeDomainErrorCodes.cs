@@ -1,7 +1,6 @@
-﻿namespace MyTree
+﻿namespace MyTree;
+
+public static class MyTreeDomainErrorCodes
 {
-    public static class MyTreeDomainErrorCodes
-    {
-        /* You can add your business exception error codes here, as constants */
-    }
+    /* You can add your business exception error codes here, as constants */
 }

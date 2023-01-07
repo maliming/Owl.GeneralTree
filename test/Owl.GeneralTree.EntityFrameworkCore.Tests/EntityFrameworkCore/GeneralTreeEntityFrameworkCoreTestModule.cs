@@ -7,43 +7,42 @@ using Owl.GeneralTree.App;
 using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.Modularity;
 
-namespace Owl.GeneralTree.EntityFrameworkCore
+namespace Owl.GeneralTree.EntityFrameworkCore;
+
+[DependsOn(
+    typeof(GeneralTreeTestBaseModule),
+    typeof(GeneralTreeEntityFrameworkCoreModule)
+)]
+public class GeneralTreeEntityFrameworkCoreTestModule : AbpModule
 {
-    [DependsOn(
-        typeof(GeneralTreeTestBaseModule),
-        typeof(GeneralTreeEntityFrameworkCoreModule)
-        )]
-    public class GeneralTreeEntityFrameworkCoreTestModule : AbpModule
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        public override void ConfigureServices(ServiceConfigurationContext context)
+        context.Services.AddAbpDbContext<TestDbContext>(options =>
         {
-            context.Services.AddAbpDbContext<TestDbContext>(options =>
-            {
-                options.AddDefaultRepositories(includeAllEntities: true);
-            });
+            options.AddDefaultRepositories(includeAllEntities: true);
+        });
 
-            var sqliteConnection = CreateDatabaseAndGetConnection();
+        var sqliteConnection = CreateDatabaseAndGetConnection();
 
-            Configure<AbpDbContextOptions>(options =>
-            {
-                options.Configure(abpDbContextConfigurationContext =>
-                {
-                    abpDbContextConfigurationContext.DbContextOptions.UseSqlite(sqliteConnection);
-                    abpDbContextConfigurationContext.DbContextOptions.EnableSensitiveDataLogging();
-                });
-            });
-        }
-
-        private static SqliteConnection CreateDatabaseAndGetConnection()
+        Configure<AbpDbContextOptions>(options =>
         {
-            var connection = new SqliteConnection("Data Source=:memory:");
-            connection.Open();
+            options.Configure(abpDbContextConfigurationContext =>
+            {
+                abpDbContextConfigurationContext.DbContextOptions.UseSqlite(sqliteConnection);
+                abpDbContextConfigurationContext.DbContextOptions.EnableSensitiveDataLogging();
+            });
+        });
+    }
 
-            new TestDbContext(
-                new DbContextOptionsBuilder<TestDbContext>().UseSqlite(connection).Options
-            ).GetService<IRelationalDatabaseCreator>().CreateTables();
+    private static SqliteConnection CreateDatabaseAndGetConnection()
+    {
+        var connection = new SqliteConnection("Data Source=:memory:");
+        connection.Open();
 
-            return connection;
-        }
+        new TestDbContext(
+            new DbContextOptionsBuilder<TestDbContext>().UseSqlite(connection).Options
+        ).GetService<IRelationalDatabaseCreator>().CreateTables();
+
+        return connection;
     }
 }

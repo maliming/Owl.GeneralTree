@@ -2,10 +2,9 @@
 using Owl.GeneralTree.App;
 using Volo.Abp.MongoDB;
 
-namespace Owl.GeneralTree.MongoDB
+namespace Owl.GeneralTree.MongoDB;
+
+public class TestDbContext : AbpMongoDbContext
 {
-    public class TestDbContext : AbpMongoDbContext
-    {
-        public IMongoCollection<Region> Regions => Collection<Region>();
-    }
+    public IMongoCollection<Region> Regions => Collection<Region>();
 }

@@ -1,15 +1,14 @@
 ﻿using MyTree.Localization;
 using Volo.Abp.Application.Services;
 
-namespace MyTree
+namespace MyTree;
+
+/* Inherit your application services from this class.
+ */
+public abstract class MyTreeAppService : ApplicationService
 {
-    /* Inherit your application services from this class.
-     */
-    public abstract class MyTreeAppService : ApplicationService
+    protected MyTreeAppService()
     {
-        protected MyTreeAppService()
-        {
-            LocalizationResource = typeof(MyTreeResource);
-        }
+        LocalizationResource = typeof(MyTreeResource);
     }
 }

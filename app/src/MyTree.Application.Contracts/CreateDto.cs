@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace MyTree
-{
-    public class CreateDto
-    {
-        public string Name { get; set; }
+namespace MyTree;
 
-        public Guid? ParentId { get; set; }
-    }
+public class CreateDto
+{
+    public string Name { get; set; }
+
+    public Guid? ParentId { get; set; }
 }

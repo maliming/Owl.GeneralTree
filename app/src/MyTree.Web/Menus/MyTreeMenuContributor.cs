@@ -4,24 +4,23 @@ using Microsoft.Extensions.Localization;
 using MyTree.Localization;
 using Volo.Abp.UI.Navigation;
 
-namespace MyTree.Web.Menus
+namespace MyTree.Web.Menus;
+
+public class MyTreeMenuContributor : IMenuContributor
 {
-    public class MyTreeMenuContributor : IMenuContributor
+    public async Task ConfigureMenuAsync(MenuConfigurationContext context)
     {
-        public async Task ConfigureMenuAsync(MenuConfigurationContext context)
+        if (context.Menu.Name == StandardMenus.Main)
         {
-            if (context.Menu.Name == StandardMenus.Main)
-            {
-                await ConfigureMainMenuAsync(context);
-            }
+            await ConfigureMainMenuAsync(context);
         }
+    }
 
-        private Task ConfigureMainMenuAsync(MenuConfigurationContext context)
-        {
-            var l = context.ServiceProvider.GetRequiredService<IStringLocalizer<MyTreeResource>>();
+    private Task ConfigureMainMenuAsync(MenuConfigurationContext context)
+    {
+        var l = context.ServiceProvider.GetRequiredService<IStringLocalizer<MyTreeResource>>();
 
-            context.Menu.Items.Insert(0, new ApplicationMenuItem("MyTree.Home", l["Menu:Home"], "/"));
-            return Task.CompletedTask;
-        }
+        context.Menu.Items.Insert(0, new ApplicationMenuItem("MyTree.Home", l["Menu:Home"], "/"));
+        return Task.CompletedTask;
     }
 }

@@ -5,32 +5,31 @@ using Volo.Abp.Localization.ExceptionHandling;
 using Volo.Abp.Validation.Localization;
 using Volo.Abp.VirtualFileSystem;
 
-namespace Owl.GeneralTree
+namespace Owl.GeneralTree;
+
+[DependsOn(
+    typeof(AbpLocalizationModule)
+)]
+public class GeneralTreeDomainSharedModule : AbpModule
 {
-    [DependsOn(
-        typeof(AbpLocalizationModule)
-    )]
-    public class GeneralTreeDomainSharedModule : AbpModule
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        public override void ConfigureServices(ServiceConfigurationContext context)
+        Configure<AbpVirtualFileSystemOptions>(options =>
         {
-            Configure<AbpVirtualFileSystemOptions>(options =>
-            {
-                options.FileSets.AddEmbedded<GeneralTreeDomainSharedModule>("Owl.GeneralTree");
-            });
+            options.FileSets.AddEmbedded<GeneralTreeDomainSharedModule>("Owl.GeneralTree");
+        });
 
-            Configure<AbpLocalizationOptions>(options =>
-            {
-                options.Resources
-                    .Add<GeneralTreeResource>("en")
-                    .AddBaseTypes(typeof(AbpValidationResource))
-                    .AddVirtualJson("/Localization/GeneralTree");
-            });
+        Configure<AbpLocalizationOptions>(options =>
+        {
+            options.Resources
+                .Add<GeneralTreeResource>("en")
+                .AddBaseTypes(typeof(AbpValidationResource))
+                .AddVirtualJson("/Localization/GeneralTree");
+        });
 
-            Configure<AbpExceptionLocalizationOptions>(options =>
-            {
-                options.MapCodeNamespace("GeneralTree", typeof(GeneralTreeResource));
-            });
-        }
+        Configure<AbpExceptionLocalizationOptions>(options =>
+        {
+            options.MapCodeNamespace("GeneralTree", typeof(GeneralTreeResource));
+        });
     }
 }

@@ -3,26 +3,25 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 
-namespace MyTree
+namespace MyTree;
+
+public interface IRegionAppService : IApplicationService
 {
-    public interface IRegionAppService : IApplicationService
-    {
-        Task CreateAsync(CreateDto input);
+    Task CreateAsync(CreateDto input);
 
-        Task UpdateAsync(UpdateInput input);
+    Task UpdateAsync(UpdateInput input);
 
-        Task<RegionDto> GetAsync(Guid id);
+    Task<RegionDto> GetAsync(Guid id);
 
-        Task<List<RegionDto>> GetTreesAsync(GetTreesDto input);
+    Task<List<RegionDto>> GetTreesAsync(GetTreesDto input);
 
-        Task MoveToBeforeAsync(Guid id, Guid beforeId);
+    Task MoveToBeforeAsync(Guid id, Guid beforeId);
 
-        Task MoveToAsync(MoveToDto input);
+    Task MoveToAsync(MoveToDto input);
 
-        Task DeleteAsync(Guid id);
+    Task DeleteAsync(Guid id);
 
-        Task RegenerateAsync(RegenerateDto input);
+    Task RegenerateAsync(RegenerateDto input);
 
-        Task ReseedAsync();
-    }
+    Task ReseedAsync();
 }

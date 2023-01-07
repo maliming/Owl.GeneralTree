@@ -1,11 +1,10 @@
-﻿using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared.Components;
-using Volo.Abp.DependencyInjection;
+﻿using Volo.Abp.DependencyInjection;
+using Volo.Abp.Ui.Branding;
 
-namespace MyTree.Web
+namespace MyTree.Web;
+
+[Dependency(ReplaceServices = true)]
+public class MyTreeBrandingProvider : DefaultBrandingProvider
 {
-    [Dependency(ReplaceServices = true)]
-    public class MyTreeBrandingProvider : DefaultBrandingProvider
-    {
-        public override string AppName => "MyTree";
-    }
+    public override string AppName => "MyTree";
 }

@@ -1,7 +1,6 @@
-﻿namespace Owl.GeneralTree
+﻿namespace Owl.GeneralTree;
+
+public class GeneralTreeCodeGeneratorOptions
 {
-    public class GeneralTreeCodeGeneratorOptions
-    {
-        public int CodeLength { get; set; } = 6;
-    }
+    public int CodeLength { get; set; } = 6;
 }

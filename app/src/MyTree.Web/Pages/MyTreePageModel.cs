@@ -1,15 +1,14 @@
 ﻿using MyTree.Localization;
 using Volo.Abp.AspNetCore.Mvc.UI.RazorPages;
 
-namespace MyTree.Web.Pages
+namespace MyTree.Web.Pages;
+
+/* Inherit your PageModel classes from this class.
+ */
+public abstract class MyTreePageModel : AbpPageModel
 {
-    /* Inherit your PageModel classes from this class.
-     */
-    public abstract class MyTreePageModel : AbpPageModel
+    protected MyTreePageModel()
     {
-        protected MyTreePageModel()
-        {
-            LocalizationResourceType = typeof(MyTreeResource);
-        }
+        LocalizationResourceType = typeof(MyTreeResource);
     }
 }

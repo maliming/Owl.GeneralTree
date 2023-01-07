@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace MyTree
-{
-    public class UpdateInput
-    {
-        public Guid Id { get; set; }
+namespace MyTree;
 
-        public string Name { get; set; }
-    }
+public class UpdateInput
+{
+    public Guid Id { get; set; }
+
+    public string Name { get; set; }
 }

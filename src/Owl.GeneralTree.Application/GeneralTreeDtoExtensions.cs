@@ -2,116 +2,115 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Owl.GeneralTree
+namespace Owl.GeneralTree;
+
+public static class GeneralTreeDtoExtensions
 {
-    public static class GeneralTreeDtoExtensions
+    public static IEnumerable<TTree> ToTree<TTree, TPrimaryKey>(this IEnumerable<TTree> tree)
+        where TPrimaryKey : struct
+        where TTree : class, IGeneralTreeDto<TTree, TPrimaryKey>
     {
-        public static IEnumerable<TTree> ToTree<TTree, TPrimaryKey>(this IEnumerable<TTree> tree)
-            where TPrimaryKey : struct
-            where TTree : class, IGeneralTreeDto<TTree, TPrimaryKey>
+        var treeDic = tree.Select(x =>
         {
-            var treeDic = tree.Select(x =>
+            x.Children = null;
+            return x;
+        }).ToDictionary(x => x.Id);
+
+        foreach (var t in treeDic.Where(x => x.Value.ParentId.HasValue).Select(x => x.Value))
+        {
+            // ReSharper disable once PossibleInvalidOperationException
+            if (!treeDic.ContainsKey(t.ParentId.Value))
             {
-                x.Children = null;
-                return x;
-            }).ToDictionary(x => x.Id);
-
-            foreach (var t in treeDic.Where(x => x.Value.ParentId.HasValue).Select(x => x.Value))
-            {
-                // ReSharper disable once PossibleInvalidOperationException
-                if (!treeDic.ContainsKey(t.ParentId.Value))
-                {
-                    continue;
-                }
-
-                var parent = treeDic[t.ParentId.Value];
-                parent.Children ??= new List<TTree>();
-
-                parent.Children.Add(t);
+                continue;
             }
 
-            if (treeDic.Values.Any(x => x.ParentId == null))
-            {
-                return treeDic.Values.Where(x => x.ParentId == null);
-            }
+            var parent = treeDic[t.ParentId.Value];
+            parent.Children ??= new List<TTree>();
 
-            return treeDic.Values.Where(x => x.ParentId != null && !treeDic.Values.Select(q => q.Id).Contains(x.ParentId.Value));
+            parent.Children.Add(t);
         }
 
-        public static IEnumerable<TTree> ToTreeOrderBy<TTree, TPrimaryKey, TTreeProperty>(this IEnumerable<TTree> tree,
-            Func<TTree, TTreeProperty> propertySelector)
-            where TPrimaryKey : struct
-            where TTree : class, IGeneralTreeDto<TTree, TPrimaryKey>
+        if (treeDic.Values.Any(x => x.ParentId == null))
         {
-            var treeDic = tree.Select(x =>
-            {
-                x.Children = null;
-                return x;
-            }).ToDictionary(x => x.Id);
-
-            foreach (var t in treeDic.Where(x => x.Value.ParentId.HasValue).Select(x => x.Value))
-            {
-                // ReSharper disable once PossibleInvalidOperationException
-                if (!treeDic.ContainsKey(t.ParentId.Value))
-                {
-                    continue;
-                }
-
-                var parent = treeDic[t.ParentId.Value];
-                parent.Children ??= new List<TTree>();
-
-                parent.Children.Add(t);
-            }
-
-            foreach (var t in treeDic.Where(x => !x.Value.Children.IsNullOrEmpty()).Select(x => x.Value))
-            {
-                t.Children = t.Children.OrderBy(propertySelector).ToList();
-            }
-
-            if (treeDic.Values.Any(x => x.ParentId == null))
-            {
-                return treeDic.Values.Where(x => x.ParentId == null).OrderBy(propertySelector);
-            }
-
-            return treeDic.Values.Where(x => x.ParentId != null && !treeDic.Values.Select(q => q.Id).Contains(x.ParentId.Value));
+            return treeDic.Values.Where(x => x.ParentId == null);
         }
 
-        public static IEnumerable<TTree> ToTreeOrderByDescending<TTree, TPrimaryKey, TTreeProperty>(
-            this IEnumerable<TTree> tree, Func<TTree, TTreeProperty> propertySelector)
-            where TPrimaryKey : struct
-            where TTree : class, IGeneralTreeDto<TTree, TPrimaryKey>
+        return treeDic.Values.Where(x => x.ParentId != null && !treeDic.Values.Select(q => q.Id).Contains(x.ParentId.Value));
+    }
+
+    public static IEnumerable<TTree> ToTreeOrderBy<TTree, TPrimaryKey, TTreeProperty>(this IEnumerable<TTree> tree,
+        Func<TTree, TTreeProperty> propertySelector)
+        where TPrimaryKey : struct
+        where TTree : class, IGeneralTreeDto<TTree, TPrimaryKey>
+    {
+        var treeDic = tree.Select(x =>
         {
-            var treeDic = tree.Select(x =>
+            x.Children = null;
+            return x;
+        }).ToDictionary(x => x.Id);
+
+        foreach (var t in treeDic.Where(x => x.Value.ParentId.HasValue).Select(x => x.Value))
+        {
+            // ReSharper disable once PossibleInvalidOperationException
+            if (!treeDic.ContainsKey(t.ParentId.Value))
             {
-                x.Children = null;
-                return x;
-            }).ToDictionary(x => x.Id);
-
-            foreach (var t in treeDic.Where(x => x.Value.ParentId.HasValue).Select(x => x.Value))
-            {
-                // ReSharper disable once PossibleInvalidOperationException
-                if (!treeDic.ContainsKey(t.ParentId.Value))
-                {
-                    continue;
-                }
-
-                var parent = treeDic[t.ParentId.Value];
-                parent.Children ??= new List<TTree>();
-
-                parent.Children.Add(t);
+                continue;
             }
 
-            foreach (var t in treeDic.Where(x => !x.Value.Children.IsNullOrEmpty()).Select(x => x.Value))
-            {
-                t.Children = t.Children.OrderByDescending(propertySelector).ToList();
-            }
+            var parent = treeDic[t.ParentId.Value];
+            parent.Children ??= new List<TTree>();
 
-            if (treeDic.Values.Any(x => x.ParentId == null))
-            {
-                return treeDic.Values.Where(x => x.ParentId == null).OrderByDescending(propertySelector);
-            }
-
-            return treeDic.Values.Where(x => x.ParentId != null && !treeDic.Values.Select(q => q.Id).Contains(x.ParentId.Value));
+            parent.Children.Add(t);
         }
+
+        foreach (var t in treeDic.Where(x => !x.Value.Children.IsNullOrEmpty()).Select(x => x.Value))
+        {
+            t.Children = t.Children.OrderBy(propertySelector).ToList();
+        }
+
+        if (treeDic.Values.Any(x => x.ParentId == null))
+        {
+            return treeDic.Values.Where(x => x.ParentId == null).OrderBy(propertySelector);
+        }
+
+        return treeDic.Values.Where(x => x.ParentId != null && !treeDic.Values.Select(q => q.Id).Contains(x.ParentId.Value));
+    }
+
+    public static IEnumerable<TTree> ToTreeOrderByDescending<TTree, TPrimaryKey, TTreeProperty>(
+        this IEnumerable<TTree> tree, Func<TTree, TTreeProperty> propertySelector)
+        where TPrimaryKey : struct
+        where TTree : class, IGeneralTreeDto<TTree, TPrimaryKey>
+    {
+        var treeDic = tree.Select(x =>
+        {
+            x.Children = null;
+            return x;
+        }).ToDictionary(x => x.Id);
+
+        foreach (var t in treeDic.Where(x => x.Value.ParentId.HasValue).Select(x => x.Value))
+        {
+            // ReSharper disable once PossibleInvalidOperationException
+            if (!treeDic.ContainsKey(t.ParentId.Value))
+            {
+                continue;
+            }
+
+            var parent = treeDic[t.ParentId.Value];
+            parent.Children ??= new List<TTree>();
+
+            parent.Children.Add(t);
+        }
+
+        foreach (var t in treeDic.Where(x => !x.Value.Children.IsNullOrEmpty()).Select(x => x.Value))
+        {
+            t.Children = t.Children.OrderByDescending(propertySelector).ToList();
+        }
+
+        if (treeDic.Values.Any(x => x.ParentId == null))
+        {
+            return treeDic.Values.Where(x => x.ParentId == null).OrderByDescending(propertySelector);
+        }
+
+        return treeDic.Values.Where(x => x.ParentId != null && !treeDic.Values.Select(q => q.Id).Contains(x.ParentId.Value));
     }
 }

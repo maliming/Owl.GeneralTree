@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace MyTree
+namespace MyTree;
+
+public class GetTreesDto
 {
-    public class GetTreesDto
-    {
-        public Guid? ParentId { get; set; }
-    }
+    public Guid? ParentId { get; set; }
 }

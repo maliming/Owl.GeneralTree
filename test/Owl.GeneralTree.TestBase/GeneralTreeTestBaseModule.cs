@@ -2,13 +2,12 @@
 using Volo.Abp.Autofac;
 using Volo.Abp.Modularity;
 
-namespace Owl.GeneralTree
+namespace Owl.GeneralTree;
+
+[DependsOn(
+    typeof(AbpAutofacModule),
+    typeof(AbpTestBaseModule)
+)]
+public class GeneralTreeTestBaseModule : AbpModule
 {
-    [DependsOn(
-        typeof(AbpAutofacModule),
-        typeof(AbpTestBaseModule)
-    )]
-    public class GeneralTreeTestBaseModule : AbpModule
-    {
-    }
 }

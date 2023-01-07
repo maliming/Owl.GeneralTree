@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace MyTree
+namespace MyTree;
+
+public class RegenerateDto
 {
-    public class RegenerateDto
-    {
-        public Guid? ParentId { get; set; }
-    }
+    public Guid? ParentId { get; set; }
 }
