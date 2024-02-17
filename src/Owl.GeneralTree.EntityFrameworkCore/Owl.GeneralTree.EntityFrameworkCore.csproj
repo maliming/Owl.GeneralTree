@@ -3,12 +3,12 @@
   <Import Project="..\..\package.props" />
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Owl.GeneralTree</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Volo.Abp.EntityFrameworkCore" Version="7.0.0" />
+    <PackageReference Include="Volo.Abp.EntityFrameworkCore" Version="8.0.3" />
     <ProjectReference Include="..\Owl.GeneralTree.Domain\Owl.GeneralTree.Domain.csproj" />
   </ItemGroup>
 
